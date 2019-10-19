@@ -36,6 +36,9 @@ def is_valid(s):
     return True
 
 
+# 总词表
+total_count_dict = {}
+
 # 连接 MongoDB
 client = pymongo.MongoClient(host, port)
 print('----连接 ' + host + ':' + str(port) + ' 成功----')
@@ -49,9 +52,9 @@ for id in school_dict.keys():
     print('----正在处理 ' + col_name + ' 集合----')
     for wb in col.find():
         year = wb['time'][:4]
-        # print('----正在处理 ' + wb['time'] + ' 的微博----')
-        if wb['time'][:7] != '2019-10':
-        # if year != '2019' and year != '2018':
+        print('----正在处理 ' + wb['time'][:10] + ' 的微博----')
+        # if wb['time'][:7] != '2019-10':
+        if year != '2019' and year != '2018':
             break
         else:
             content = wb['content']
@@ -63,6 +66,12 @@ for id in school_dict.keys():
                     else:
                         val = word_count_dict[word]
                         word_count_dict[word] = val + 1
+
+                    if word not in total_count_dict.keys():
+                        total_count_dict[word] = 1
+                    else:
+                        val = total_count_dict[word]
+                        total_count_dict[word] = val + 1
     # 将结果输出到文件
     sorted_key = sorted(word_count_dict.items(), key=lambda x: x[1], reverse=True)
     with open(out_file_path, 'w', encoding='UTF-8') as out_file:
@@ -70,3 +79,11 @@ for id in school_dict.keys():
             key = t[0]
             out_file.write(key + ' ' + str(word_count_dict[key]) + '\n')
     print('---- ' + id + '.txt 输出完毕----')
+
+# 输出总文件
+total_sorted_key = sorted(total_count_dict.items(), key=lambda x: x[1], reverse=True)
+with open('./out/all.txt', 'w', encoding='UTF-8') as total_out_file:
+    for t in total_sorted_key:
+        key = t[0]
+        total_out_file.write(key + ' ' + str(total_count_dict[key]) + '\n')
+print('---- all.txt 输出完毕----')
